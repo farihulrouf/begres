@@ -73,3 +73,33 @@ func GetAllTender(c *fiber.Ctx) error {
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tenders}},
 	)
 }
+
+func GetFilterTender(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	paguId := c.Params("paguId")
+	var tenders []models.Tender
+	defer cancel()
+	//objId, _ := primitive.ObjectIDFromHex(paguId)
+	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
+	results, err := tenderCollection.Find(ctx, bson.M{"idpagu": paguId})
+	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleTender models.Tender
+		if err = results.Decode(&singleTender); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+
+		tenders = append(tenders, singleTender)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tenders}},
+	)
+}

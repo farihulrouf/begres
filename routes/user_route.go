@@ -28,6 +28,7 @@ func UserRoute(app *fiber.App) {
 	//tender
 	app.Post("/api/tender", controllers.CreateTender)
 	app.Get("/api/tender", controllers.GetAllTender)
+	app.Get("/api/tender/pagu/:paguId", controllers.GetFilterTender)
 
 	//langsung
 	app.Post("/api/langsung", controllers.CreateLangsung)
