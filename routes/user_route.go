@@ -25,6 +25,9 @@ func UserRoute(app *fiber.App) {
 	app.Post("/api/anggaran", controllers.CreatePanggaran)
 	app.Get("/api/anggaran", controllers.GetAllAnggaran)
 	app.Get("/api/anggaran/pagu/:paguId", controllers.GetFilterAnggaran)
+	app.Delete("/api/anggaran/:paguId", controllers.DeleteAnggran)
+	app.Put("/api/anggaran/:paguId", controllers.EditAnggaran)
+	app.Get("/api/anggaran/:paguId", controllers.GetAnggaran)
 
 	//tender
 	app.Post("/api/tender", controllers.CreateTender)

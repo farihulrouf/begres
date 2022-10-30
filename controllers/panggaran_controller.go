@@ -34,7 +34,9 @@ func CreatePanggaran(c *fiber.Ctx) error {
 	newPanggaran := models.Panggaran{
 		Id:     primitive.NewObjectID(),
 		Name:   panggaran.Name,
-		Jumlah: panggaran.Jumlah,
+		Pagu:   panggaran.Pagu,
+		Paket:  panggaran.Paket,
+		Jadwal: panggaran.Jadwal,
 		Idpagu: panggaran.Idpagu,
 	}
 
@@ -100,4 +102,80 @@ func GetFilterAnggaran(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": panggarans}},
 	)
+}
+
+func DeleteAnggran(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	anggaranId := c.Params("paguId")
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(anggaranId)
+
+	result, err := panggaranCollection.DeleteOne(ctx, bson.M{"id": objId})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	if result.DeletedCount < 1 {
+		return c.Status(http.StatusNotFound).JSON(
+			responses.UserResponse{Status: http.StatusNotFound, Message: "error", Data: &fiber.Map{"data": "Pagu with specified ID not found!"}},
+		)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": "Pagu successfully deleted!"}},
+	)
+}
+
+func EditAnggaran(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	anggaranId := c.Params("paguId")
+	var anggaran models.Panggaran
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(anggaranId)
+
+	//validate the request body
+	if err := c.BodyParser(&anggaran); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//use the validator library to validate required fields
+	if validationErr := validate.Struct(&anggaran); validationErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
+	}
+
+	update := bson.M{"name": anggaran.Name, "paket": anggaran.Paket, "pagu": anggaran.Pagu, "jadwal": anggaran.Jadwal}
+
+	result, err := panggaranCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//get updated user details
+	var updateAnggaran models.Panggaran
+	if result.MatchedCount == 1 {
+		err := tenderCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updateAnggaran)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+	}
+
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": updateAnggaran}})
+}
+
+func GetAnggaran(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	anggaranId := c.Params("paguId")
+	var tender models.Tender
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(anggaranId)
+
+	err := panggaranCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&tender)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tender}})
 }
