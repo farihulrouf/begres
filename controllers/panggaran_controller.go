@@ -72,3 +72,32 @@ func GetAllAnggaran(c *fiber.Ctx) error {
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": panggarans}},
 	)
 }
+func GetFilterAnggaran(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	paguId := c.Params("paguId")
+	var panggarans []models.Panggaran
+	defer cancel()
+	//objId, _ := primitive.ObjectIDFromHex(paguId)
+	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
+	results, err := panggaranCollection.Find(ctx, bson.M{"idpagu": paguId})
+	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singPanggaran models.Panggaran
+		if err = results.Decode(&singPanggaran); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+
+		panggarans = append(panggarans, singPanggaran)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": panggarans}},
+	)
+}

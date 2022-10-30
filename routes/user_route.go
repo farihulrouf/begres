@@ -24,14 +24,29 @@ func UserRoute(app *fiber.App) {
 	//Pagu anggaran
 	app.Post("/api/anggaran", controllers.CreatePanggaran)
 	app.Get("/api/anggaran", controllers.GetAllAnggaran)
+	app.Get("/api/anggaran/pagu/:paguId", controllers.GetFilterAnggaran)
 
 	//tender
 	app.Post("/api/tender", controllers.CreateTender)
 	app.Get("/api/tender", controllers.GetAllTender)
+	app.Put("/api/tender/:paguId", controllers.EditTender)
+	app.Delete("/api/tender/:paguId", controllers.DeleteTender)
 	app.Get("/api/tender/pagu/:paguId", controllers.GetFilterTender)
+	app.Get("/api/tender/:paguId", controllers.GetTender)
 
 	//langsung
 	app.Post("/api/langsung", controllers.CreateLangsung)
 	app.Get("/api/langsung", controllers.GetAllLangsung)
+	app.Get("/api/langsung/pagu/:paguId", controllers.GetFilterLangsung)
+	app.Get("/api/langsung/:paguId", controllers.GetLangsung)
+	app.Delete("/api/langsung/:paguId", controllers.DeleteLangsung)
+	app.Put("/api/kecuali/:paguId", controllers.EditLangsug)
+
+	//
+	app.Post("/api/kecuali", controllers.CreateKecuali)
+	app.Get("/api/kecuali/pagu/:paguId", controllers.GetFilterKecuali)
+	app.Get("/api/kecuali/:paguId", controllers.GetKecuali)
+	app.Delete("/api/kecuali/:paguId", controllers.DeleteKecuali)
+	app.Put("/api/kecuali/:paguId", controllers.EditKecuali)
 
 }

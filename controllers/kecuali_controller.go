@@ -14,33 +14,33 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var tenderCollection *mongo.Collection = configs.GetCollection(configs.DB, "tender")
+var kecualiCollection *mongo.Collection = configs.GetCollection(configs.DB, "kecuali")
 
-func CreateTender(c *fiber.Ctx) error {
+func CreateKecuali(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var tender models.Tender
+	var kecuali models.Kecuali
 	defer cancel()
 
 	//validate the request body
-	if err := c.BodyParser(&tender); err != nil {
+	if err := c.BodyParser(&kecuali); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
 	//use the validator library to validate required fields
-	if validationErr := validate.Struct(&tender); validationErr != nil {
+	if validationErr := validate.Struct(&kecuali); validationErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	newTender := models.Tender{
+	newKecuali := models.Kecuali{
 		Id:     primitive.NewObjectID(),
-		Name:   tender.Name,
-		Paket:  tender.Paket,
-		Pagu:   tender.Pagu,
-		Jadwal: tender.Jadwal,
-		Idpagu: tender.Idpagu,
+		Name:   kecuali.Name,
+		Paket:  kecuali.Paket,
+		Pagu:   kecuali.Pagu,
+		Jadwal: kecuali.Jadwal,
+		Idpagu: kecuali.Idpagu,
 	}
 
-	result, err := tenderCollection.InsertOne(ctx, newTender)
+	result, err := kecualiCollection.InsertOne(ctx, newKecuali)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -48,12 +48,12 @@ func CreateTender(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
 }
 
-func GetAllTender(c *fiber.Ctx) error {
+func GetAllKecuali(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var tenders []models.Tender
+	var kecualis []models.Kecuali
 	defer cancel()
 
-	results, err := tenderCollection.Find(ctx, bson.M{})
+	results, err := kecualiCollection.Find(ctx, bson.M{})
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
@@ -62,27 +62,27 @@ func GetAllTender(c *fiber.Ctx) error {
 	//reading from the db in an optimal way
 	defer results.Close(ctx)
 	for results.Next(ctx) {
-		var singTender models.Tender
-		if err = results.Decode(&singTender); err != nil {
+		var singKecuali models.Kecuali
+		if err = results.Decode(&singKecuali); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
 
-		tenders = append(tenders, singTender)
+		kecualis = append(kecualis, singKecuali)
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tenders}},
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": kecualis}},
 	)
 }
 
-func GetFilterTender(c *fiber.Ctx) error {
+func GetFilterKecuali(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	paguId := c.Params("paguId")
-	var tenders []models.Tender
+	kecualiId := c.Params("paguId")
+	var kecualis []models.Kecuali
 	defer cancel()
 	//objId, _ := primitive.ObjectIDFromHex(paguId)
 	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
-	results, err := tenderCollection.Find(ctx, bson.M{"idpagu": paguId})
+	results, err := kecualiCollection.Find(ctx, bson.M{"idpagu": kecualiId})
 	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
 
 	if err != nil {
@@ -92,27 +92,27 @@ func GetFilterTender(c *fiber.Ctx) error {
 	//reading from the db in an optimal way
 	defer results.Close(ctx)
 	for results.Next(ctx) {
-		var singleTender models.Tender
-		if err = results.Decode(&singleTender); err != nil {
+		var singleKecuali models.Kecuali
+		if err = results.Decode(&singleKecuali); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
 
-		tenders = append(tenders, singleTender)
+		kecualis = append(kecualis, singleKecuali)
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tenders}},
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": kecualis}},
 	)
 }
 
-func DeleteTender(c *fiber.Ctx) error {
+func DeleteKecuali(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	tenderId := c.Params("paguId")
+	kecualiId := c.Params("paguId")
 	defer cancel()
 
-	objId, _ := primitive.ObjectIDFromHex(tenderId)
+	objId, _ := primitive.ObjectIDFromHex(kecualiId)
 
-	result, err := tenderCollection.DeleteOne(ctx, bson.M{"id": objId})
+	result, err := kecualiCollection.DeleteOne(ctx, bson.M{"id": objId})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -128,55 +128,55 @@ func DeleteTender(c *fiber.Ctx) error {
 	)
 }
 
-func EditTender(c *fiber.Ctx) error {
+func EditKecuali(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	tenderId := c.Params("paguId")
-	var tender models.Tender
+	kecualiId := c.Params("paguId")
+	var kecuali models.Kecuali
 	defer cancel()
 
-	objId, _ := primitive.ObjectIDFromHex(tenderId)
+	objId, _ := primitive.ObjectIDFromHex(kecualiId)
 
 	//validate the request body
-	if err := c.BodyParser(&tender); err != nil {
+	if err := c.BodyParser(&kecuali); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
 	//use the validator library to validate required fields
-	if validationErr := validate.Struct(&tender); validationErr != nil {
+	if validationErr := validate.Struct(&kecuali); validationErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": tender.Name, "paket": tender.Paket, "pagu": tender.Pagu, "jadwal": tender.Jadwal}
+	update := bson.M{"name": kecuali.Name, "paket": kecuali.Paket, "pagu": kecuali.Pagu, "jadwal": kecuali.Jadwal}
 
-	result, err := tenderCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	result, err := kecualiCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
 	//get updated user details
-	var updateTender models.Tender
+	var updateKecuali models.Kecuali
 	if result.MatchedCount == 1 {
-		err := tenderCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updateTender)
+		err := langsungCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updateKecuali)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": updateTender}})
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": updateKecuali}})
 }
 
-func GetTender(c *fiber.Ctx) error {
+func GetKecuali(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	tenderId := c.Params("paguId")
-	var tender models.Tender
+	kecualiId := c.Params("paguId")
+	var kecuali models.Kecuali
 	defer cancel()
 
-	objId, _ := primitive.ObjectIDFromHex(tenderId)
+	objId, _ := primitive.ObjectIDFromHex(kecualiId)
 
-	err := tenderCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&tender)
+	err := langsungCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&kecuali)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tender}})
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": kecuali}})
 }
