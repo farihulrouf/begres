@@ -41,6 +41,7 @@ func UserRoute(app *fiber.App) {
 	app.Post("/api/langsung", controllers.CreateLangsung)
 	app.Get("/api/langsung", controllers.GetAllLangsung)
 	app.Get("/api/langsung/pagu/:paguId", controllers.GetFilterLangsung)
+	app.Get("/api/langsung/pagu/:paguId/:tipe", controllers.GetFilterLangsungByType)
 	app.Get("/api/langsung/:paguId", controllers.GetLangsung)
 	app.Delete("/api/langsung/:paguId", controllers.DeleteLangsung)
 	app.Put("/api/kecuali/:paguId", controllers.EditLangsug)

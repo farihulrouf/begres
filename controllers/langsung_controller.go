@@ -37,6 +37,8 @@ func CreateLangsung(c *fiber.Ctx) error {
 		Paket:  langsung.Paket,
 		Pagu:   langsung.Pagu,
 		Jadwal: langsung.Jadwal,
+		Pdn:    langsung.Pdn,
+		Tipe:   langsung.Tipe,
 		Idpagu: langsung.Idpagu,
 	}
 
@@ -83,6 +85,38 @@ func GetFilterLangsung(c *fiber.Ctx) error {
 	//objId, _ := primitive.ObjectIDFromHex(paguId)
 	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
 	results, err := langsungCollection.Find(ctx, bson.M{"idpagu": paguId})
+	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleLangsung models.Langsung
+		if err = results.Decode(&singleLangsung); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+
+		langsungs = append(langsungs, singleLangsung)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": langsungs}},
+	)
+}
+
+func GetFilterLangsungByType(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	paguId := c.Params("paguId")
+	tipe := c.Params(("tipe"))
+	var langsungs []models.Langsung
+	defer cancel()
+	//objId, _ := primitive.ObjectIDFromHex(paguId)
+	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
+	//(ctx, User{Name: "UserName", Phone: "1234567890"})
+	results, err := langsungCollection.Find(ctx, bson.M{"idpagu": paguId, "tipe": tipe})
 	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
 
 	if err != nil {

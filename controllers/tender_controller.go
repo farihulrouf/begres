@@ -32,12 +32,15 @@ func CreateTender(c *fiber.Ctx) error {
 	}
 
 	newTender := models.Tender{
-		Id:     primitive.NewObjectID(),
-		Name:   tender.Name,
-		Paket:  tender.Paket,
-		Pagu:   tender.Pagu,
-		Jadwal: tender.Jadwal,
-		Idpagu: tender.Idpagu,
+		Id:          primitive.NewObjectID(),
+		Name:        tender.Name,
+		Paket:       tender.Paket,
+		Pagu:        tender.Pagu,
+		Jadwal:      tender.Jadwal,
+		Pelaksanaan: tender.Pelaksanaan,
+		Pemilihan:   tender.Pemilihan,
+		Pdn:         tender.Pdn,
+		Idpagu:      tender.Idpagu,
 	}
 
 	result, err := tenderCollection.InsertOne(ctx, newTender)

@@ -8,5 +8,7 @@ type Langsung struct {
 	Paket  string             `json:"paket,omitempty" validate:"required"`
 	Pagu   string             `json:"pagu,omitempty" validate:"required"`
 	Jadwal string             `json:"jadwal,omitempty" validate:"required"`
+	Pdn    string             `json:"pdn,omitempty" validate:"required"`
+	Tipe   string             `json:"tipe,omitempty" validate:"required"`
 	Idpagu string             `json:"idpagu,omitempty" validate:"required"`
 }
