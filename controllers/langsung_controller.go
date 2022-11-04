@@ -39,6 +39,7 @@ func CreateLangsung(c *fiber.Ctx) error {
 		Jadwal: langsung.Jadwal,
 		Pdn:    langsung.Pdn,
 		Tipe:   langsung.Tipe,
+		Ket:    langsung.Ket,
 		Idpagu: langsung.Idpagu,
 	}
 

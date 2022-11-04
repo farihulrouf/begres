@@ -10,5 +10,6 @@ type Langsung struct {
 	Jadwal string             `json:"jadwal,omitempty" validate:"required"`
 	Pdn    string             `json:"pdn,omitempty" validate:"required"`
 	Tipe   string             `json:"tipe,omitempty" validate:"required"`
+	Ket    string             `json:"ket,omitempty" validate:"required"`
 	Idpagu string             `json:"idpagu,omitempty" validate:"required"`
 }
