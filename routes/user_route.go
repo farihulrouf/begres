@@ -6,13 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func UserRoute(app *fiber.App) {
-	app.Post("/user", controllers.CreateUser)
-	app.Get("/user/:userId", controllers.GetAUser)
-	app.Put("/user/:userId", controllers.EditAUser)
-	app.Delete("/user/:userId", controllers.DeleteAUser)
-	app.Get("/users", controllers.GetAllUsers)
-
+func AppRoute(app *fiber.App) {
 	//Post Pagu
 
 	app.Post("/api/pagus", controllers.CreatePagu)
@@ -47,10 +41,5 @@ func UserRoute(app *fiber.App) {
 	app.Put("/api/kecuali/:paguId", controllers.EditLangsug)
 
 	//
-	app.Post("/api/kecuali", controllers.CreateKecuali)
-	app.Get("/api/kecuali/pagu/:paguId", controllers.GetFilterKecuali)
-	app.Get("/api/kecuali/:paguId", controllers.GetKecuali)
-	app.Delete("/api/kecuali/:paguId", controllers.DeleteKecuali)
-	app.Put("/api/kecuali/:paguId", controllers.EditKecuali)
 
 }
