@@ -37,6 +37,7 @@ func CreatePanggaran(c *fiber.Ctx) error {
 		Pagu:   panggaran.Pagu,
 		Paket:  panggaran.Paket,
 		Jadwal: panggaran.Jadwal,
+		Pdn:    panggaran.Pdn,
 		Idpagu: panggaran.Idpagu,
 	}
 
