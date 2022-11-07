@@ -232,6 +232,50 @@ func GetTotalTender(c *fiber.Ctx) error {
 	)
 }
 
+func GetTotalTenderNameAll(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	//paguId := c.Params("paguId")
+	var totalTenders []models.Tendertotalpaket
+	defer cancel()
+
+	//matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	groupStage := bson.D{
+		{"$group", bson.D{
+			{"_id", "$ket"},
+			{"total", bson.D{{"$sum", 1}}},
+			{"totalPagu", bson.D{{"$sum", "$pagu"}}},
+		}},
+	}
+	projectStage := bson.D{
+		{"$project", bson.D{
+			{"_id", 0},
+			{"ket", "$_id"},
+			{"total", 1},
+			{"totalPagu", 1},
+		}},
+	}
+
+	results, err := tenderCollection.Aggregate(ctx, mongo.Pipeline{groupStage, projectStage})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleTender models.Tendertotalpaket
+		if err = results.Decode(&singleTender); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+		//fmt.Println(results)
+		totalTenders = append(totalTenders, singleTender)
+		//fmt.Print((tenders))
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": totalTenders}},
+	)
+}
 func GetTotalTenderName(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	paguId := c.Params("paguId")
