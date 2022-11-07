@@ -42,6 +42,7 @@ func CreateTender(c *fiber.Ctx) error {
 		Pelaksanaan: tender.Pelaksanaan,
 		Pemilihan:   tender.Pemilihan,
 		Pdn:         tender.Pdn,
+		Ket:         tender.Ket,
 		Idpagu:      tender.Idpagu,
 	}
 
@@ -240,7 +241,7 @@ func GetTotalTenderName(c *fiber.Ctx) error {
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
-			{"_id", "$paket"},
+			{"_id", "$ket"},
 			{"total", bson.D{{"$sum", 1}}},
 			{"totalPagu", bson.D{{"$sum", "$pagu"}}},
 		}},
@@ -248,7 +249,7 @@ func GetTotalTenderName(c *fiber.Ctx) error {
 	projectStage := bson.D{
 		{"$project", bson.D{
 			{"_id", 0},
-			{"paket", "$_id"},
+			{"ket", "$_id"},
 			{"total", 1},
 			{"totalPagu", 1},
 		}},
