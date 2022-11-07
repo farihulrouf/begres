@@ -5,6 +5,7 @@ import (
 	"begres/models"
 	"begres/responses"
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -224,11 +225,11 @@ func GetTotalTenderLangsung(c *fiber.Ctx) error {
 	tipe := c.Params("tipe")
 	var totalTenders []models.Totaltender
 	defer cancel()
-
+	//  { $sort : { total : 1 } }
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
 
 	matchStageN := bson.D{{"$match", bson.D{{"tipe", tipe}}}}
-
+	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
 			{"_id", "$name"},
@@ -247,7 +248,7 @@ func GetTotalTenderLangsung(c *fiber.Ctx) error {
 
 	// {$match: {"$and": [{idpagu: '635c8575a49fb441d6ff4670'}, {tipe: "langsung"}]}},
 
-	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, matchStageN, groupStage, projectStage})
+	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, matchStageN, groupStage, projectStage, sortStage})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -267,4 +268,54 @@ func GetTotalTenderLangsung(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(
 		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": totalTenders}},
 	)
+}
+
+func GetAllTotalTenderLangsung(c *fiber.Ctx) error {
+	//fmt.Print("dieksekusi")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	paguId := c.Params("paguId")
+	//tipe := c.Params("tipe")
+	var totalTenders []models.Totaltipe
+	defer cancel()
+	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
+	groupStage := bson.D{
+		{"$group", bson.D{
+			{"_id", "$tipe"},
+			{"total", bson.D{{"$sum", 1}}},
+			{"totalPagu", bson.D{{"$sum", "$pagu"}}},
+		}},
+	}
+	projectStage := bson.D{
+		{"$project", bson.D{
+			{"_id", 0},
+			{"tipe", "$_id"},
+			{"total", 1},
+			{"totalPagu", 1},
+		}},
+	}
+
+	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage, projectStage, sortStage})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	fmt.Print("disekskusi")
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleTender models.Totaltipe
+		if err = results.Decode(&singleTender); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+		fmt.Println(results)
+		totalTenders = append(totalTenders, singleTender)
+		//fmt.Print((totalTenders))
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": totalTenders}},
+	)
+
 }
