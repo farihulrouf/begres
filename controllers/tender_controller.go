@@ -239,6 +239,7 @@ func GetTotalTenderNameAll(c *fiber.Ctx) error {
 	defer cancel()
 
 	//matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	sortStage := bson.D{{"$sort", bson.D{{"ket", 1}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
 			{"_id", "$ket"},
@@ -255,7 +256,7 @@ func GetTotalTenderNameAll(c *fiber.Ctx) error {
 		}},
 	}
 
-	results, err := tenderCollection.Aggregate(ctx, mongo.Pipeline{groupStage, projectStage})
+	results, err := tenderCollection.Aggregate(ctx, mongo.Pipeline{groupStage, projectStage, sortStage})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -281,7 +282,7 @@ func GetTotalTenderName(c *fiber.Ctx) error {
 	paguId := c.Params("paguId")
 	var totalTenders []models.Tendertotalpaket
 	defer cancel()
-
+	sortStage := bson.D{{"$sort", bson.D{{"ket", 1}}}}
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
@@ -299,7 +300,7 @@ func GetTotalTenderName(c *fiber.Ctx) error {
 		}},
 	}
 
-	results, err := tenderCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage, projectStage})
+	results, err := tenderCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage, projectStage, sortStage})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
