@@ -45,8 +45,9 @@ func AppRoute(app *fiber.App) {
 	app.Get("/api/jumlahtotal", controllers.GetAllTotalTenderLangsungAll)
 
 	app.Delete("/api/langsung/:paguId", controllers.DeleteLangsung)
-	app.Put("/api/kecuali/:paguId", controllers.EditLangsug)
+	app.Put("/api/langsung/:paguId", controllers.EditLangsug)
 
-	//
+	//uploudfile
+	app.Post("/api/uploud", controllers.CreatetoUpload)
 
 }

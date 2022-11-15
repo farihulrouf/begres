@@ -6,6 +6,8 @@ import (
 	"begres/responses"
 	"context"
 	"fmt"
+
+	//"fmt"
 	"net/http"
 	"time"
 
@@ -184,7 +186,22 @@ func EditLangsug(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal}
+	/*
+
+		newLangsung := models.Langsung{
+			Id:     primitive.NewObjectID(),
+			Name:   langsung.Name,
+			Paket:  langsung.Paket,
+			Pagu:   langsung.Pagu,
+			Jadwal: langsung.Jadwal,
+			Pdn:    langsung.Pdn,
+			Tipe:   langsung.Tipe,
+			Ket:    langsung.Ket,
+			Idpagu: langsung.Idpagu,
+		}
+	*/
+
+	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket}
 
 	result, err := langsungCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {
@@ -302,14 +319,14 @@ func GetAllTotalTenderLangsung(c *fiber.Ctx) error {
 	}
 
 	//reading from the db in an optimal way
-	fmt.Print("disekskusi")
+	//fmt.Print("disekskusi")
 	defer results.Close(ctx)
 	for results.Next(ctx) {
 		var singleTender models.Totaltipe
 		if err = results.Decode(&singleTender); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
-		fmt.Println(results)
+		//fmt.Println(results)
 		totalTenders = append(totalTenders, singleTender)
 		//fmt.Print((totalTenders))
 	}
