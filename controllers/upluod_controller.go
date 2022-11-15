@@ -23,7 +23,7 @@ func CreatetoUpload(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var upload models.Upload
 	defer cancel()
-	file, errFile := c.FormFile("filetipe")
+	file, errFile := c.FormFile("file")
 
 	if errFile != nil {
 		fmt.Println("error")
@@ -35,23 +35,26 @@ func CreatetoUpload(c *fiber.Ctx) error {
 	if errSaveFile != nil {
 		fmt.Println("error save file")
 	}
-	fmt.Println("isi dari ", filename)
-	fmt.Println("isi dari is", upload.Comment)
+	//fmt.Println("isi dari ", filename)
+	//fmt.Println("isi dari is", upload.Comment)
 	//validate the request body
 	if err := c.BodyParser(&upload); err != nil {
+		//fmt.Println("error data")
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
-
-	//use the validator library to validate required fields
-	if validationErr := validate.Struct(&upload); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
-	}
+	/*
+		//use the validator library to validate required fields
+		if validationErr := validate.Struct(&upload); validationErr != nil {
+			//fmt.Println("error data")
+			return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
+		}
+	*/
 
 	newUopload := models.Upload{
-		Id:       primitive.NewObjectID(),
-		Comment:  upload.Comment,
-		Filetipe: filename,
-		Idpagu:   upload.Idpagu,
+		Id: primitive.NewObjectID(),
+		//Comment: upload.Comment,
+		File:   filename,
+		Idpagu: upload.Idpagu,
 	}
 
 	result, err := uploadCollention.InsertOne(ctx, newUopload)
