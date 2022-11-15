@@ -5,7 +5,8 @@ import (
 	"begres/models"
 	"begres/responses"
 	"context"
-	"fmt"
+
+	//s"fmt"
 
 	//"fmt"
 	"net/http"
@@ -369,14 +370,14 @@ func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
 	}
 
 	//reading from the db in an optimal way
-	fmt.Print("disekskusi")
+	//fmt.Print("disekskusi")
 	defer results.Close(ctx)
 	for results.Next(ctx) {
 		var singleTender models.Totaltipe
 		if err = results.Decode(&singleTender); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
-		fmt.Println(results)
+		//fmt.Println(results)
 		totalTenders = append(totalTenders, singleTender)
 		//fmt.Print((totalTenders))
 	}

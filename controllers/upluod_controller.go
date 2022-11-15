@@ -24,20 +24,16 @@ func CreatetoUpload(c *fiber.Ctx) error {
 	var upload models.Upload
 	defer cancel()
 	file, errFile := c.FormFile("file")
-
 	if errFile != nil {
 		fmt.Println("error")
 	}
 	filename := file.Filename
 	//fmt.Print(filename)
-	errSaveFile := c.SaveFile(file, fmt.Sprint("./public/images/", filename))
+	errSaveFile := c.SaveFile(file, fmt.Sprint("./public/docs/", filename))
 
 	if errSaveFile != nil {
 		fmt.Println("error save file")
 	}
-	//fmt.Println("isi dari ", filename)
-	//fmt.Println("isi dari is", upload.Comment)
-	//validate the request body
 	if err := c.BodyParser(&upload); err != nil {
 		//fmt.Println("error data")
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
@@ -51,10 +47,11 @@ func CreatetoUpload(c *fiber.Ctx) error {
 	*/
 
 	newUopload := models.Upload{
-		Id: primitive.NewObjectID(),
-		//Comment: upload.Comment,
-		File:   filename,
-		Idpagu: upload.Idpagu,
+		Id:        primitive.NewObjectID(),
+		File:      filename,
+		Idpagu:    upload.Idpagu,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	result, err := uploadCollention.InsertOne(ctx, newUopload)

@@ -34,10 +34,12 @@ func CreatePagu(c *fiber.Ctx) error {
 	}
 
 	newPagu := models.Pagu{
-		Id:       primitive.NewObjectID(),
-		Name:     pagu.Name,
-		Paguopdp: pagu.Paguopdp,
-		Paguorp:  pagu.Paguorp,
+		Id:        primitive.NewObjectID(),
+		Name:      pagu.Name,
+		Paguopdp:  pagu.Paguopdp,
+		Paguorp:   pagu.Paguorp,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	result, err := paguCollection.InsertOne(ctx, newPagu)
@@ -116,7 +118,7 @@ func EditPagu(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": pagu.Name, "paguopdp": pagu.Paguopdp, "paguorp": pagu.Paguorp}
+	update := bson.M{"name": pagu.Name, "paguopdp": pagu.Paguopdp, "paguorp": pagu.Paguorp, "updatedat": time.Now()}
 
 	result, err := paguCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {
