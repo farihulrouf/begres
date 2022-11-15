@@ -19,6 +19,7 @@ func main() {
 		AllowCredentials: true,
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
 	}))
+	app.Static("/", "./public")
 
 	configs.ConnectDB()
 

@@ -49,5 +49,6 @@ func AppRoute(app *fiber.App) {
 
 	//uploudfile
 	app.Post("/api/uploud", controllers.CreatetoUpload)
+	app.Get("/api/upload/:paguId", controllers.GetFilterUpload)
 
 }
