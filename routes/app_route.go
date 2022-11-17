@@ -14,27 +14,16 @@ func AppRoute(app *fiber.App) {
 	app.Get("/api/pagus/:paguId", controllers.GetPagu)
 	app.Delete("/api/pagus/:paguId", controllers.DeletePagu)
 	app.Put("/api/pagus/:paguId", controllers.EditPagu)
+	app.Put("/api/pagus/edit/:paguId", controllers.EditPaguUpload)
+	//EditPaguUpload
 
 	//Pagu anggaran
-	app.Post("/api/anggaran", controllers.CreatePanggaran)
+	app.Post("/api/anggaran", controllers.CreateAnggaran)
 	app.Get("/api/anggaran", controllers.GetAllAnggaran)
 	app.Get("/api/anggaran/pagu/:paguId", controllers.GetFilterAnggaran)
 	app.Delete("/api/anggaran/:paguId", controllers.DeleteAnggran)
 	app.Put("/api/anggaran/:paguId", controllers.EditAnggaran)
 	app.Get("/api/anggaran/:paguId", controllers.GetAnggaran)
-
-	//tender
-	app.Post("/api/tender", controllers.CreateTender)
-	app.Get("/api/tender", controllers.GetAllTender)
-	app.Put("/api/tender/:paguId", controllers.EditTender)
-	app.Delete("/api/tender/:paguId", controllers.DeleteTender)
-	app.Get("/api/tender/pagu/:paguId", controllers.GetFilterTender)
-	app.Get("/api/tender/:paguId", controllers.GetTender)
-	app.Get("/api/tender/total/:paguId", controllers.GetTotalTender)
-	app.Get("/api/tender/totalpaket/:paguId", controllers.GetTotalTenderName)
-	app.Get("/api/jumlahtender", controllers.GetTotalTenderNameAll)
-	app.Get("/api/totalpdntender/:paguId", controllers.GetAllTotalTenderPdnAllTender)
-	//GetAllTotalTenderPdnAllTender
 
 	//langsung
 	app.Post("/api/langsung", controllers.CreateLangsung)
@@ -44,6 +33,9 @@ func AppRoute(app *fiber.App) {
 	app.Get("/api/langsung/:paguId", controllers.GetLangsung)
 	app.Get("/api/langsung/pagu/total/:paguId/:tipe", controllers.GetTotalTenderLangsung)
 	app.Get("/api/langsung/totalsemua/:paguId", controllers.GetAllTotalTenderLangsung)
+
+	app.Get("/api/langsung/totalseleksitender/:paguId", controllers.GetAllTotalTenderLangsungBySeleksiCepat)
+	//GetAllTotalTenderLangsungBySeleksiCepat
 	app.Get("/api/jumlahtotal", controllers.GetAllTotalTenderLangsungAll)
 	app.Get("/api/totalpdn/:paguId", controllers.GetAllTotalTenderPdnAll)
 

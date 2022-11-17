@@ -5,6 +5,7 @@ import (
 	"begres/models"
 	"begres/responses"
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -151,4 +152,46 @@ func GetPagu(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": pagu}})
+}
+
+func EditPaguUpload(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	paguId := c.Params("paguId")
+	var pagu models.Pagu
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(paguId)
+	file, errFile := c.FormFile("file")
+	if errFile != nil {
+		fmt.Println("error")
+	}
+	filename := file.Filename
+	//fmt.Print(filename)
+	errSaveFile := c.SaveFile(file, fmt.Sprint("./public/docs/", filename))
+
+	if errSaveFile != nil {
+		fmt.Println("error save file")
+	}
+	//validate the request body
+	if err := c.BodyParser(&pagu); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	update := bson.M{"name": pagu.Name, "paguopdp": pagu.Paguopdp, "paguorp": pagu.Paguorp, "filetipe": filename, "updatedat": time.Now()}
+
+	result, err := paguCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//get updated user details
+	var updatePagu models.Pagu
+	if result.MatchedCount == 1 {
+		err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatePagu)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+	}
+
+	return c.Status(http.StatusOK).JSON(responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": updatePagu}})
 }

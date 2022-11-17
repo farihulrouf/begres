@@ -38,16 +38,35 @@ func CreateLangsung(c *fiber.Ctx) error {
 	}
 
 	newLangsung := models.Langsung{
-		Id:     primitive.NewObjectID(),
-		Name:   langsung.Name,
-		Paket:  langsung.Paket,
-		Pagu:   langsung.Pagu,
-		Jadwal: langsung.Jadwal,
-		Pdn:    langsung.Pdn,
-		Tipe:   langsung.Tipe,
-		Ket:    langsung.Ket,
-		Idpagu: langsung.Idpagu,
+		Id:          primitive.NewObjectID(),
+		Name:        langsung.Name,
+		Paket:       langsung.Paket,
+		Pagu:        langsung.Pagu,
+		Jadwal:      langsung.Jadwal,
+		Pdn:         langsung.Pdn,
+		Tipe:        langsung.Tipe,
+		Pelaksanaan: langsung.Pelaksanaan,
+		Pemilihan:   langsung.Pemilihan,
+		Ket:         langsung.Ket,
+		Tender:      langsung.Tender,
+		Idpagu:      langsung.Idpagu,
 	}
+
+	/*
+
+		Id          primitive.ObjectID `json:"id,omitempty"`
+		Name        string             `json:"name,omitempty" validate:"required"`
+		Paket       string             `json:"paket,omitempty" validate:"required"`
+		Pagu        float32            `json:"pagu,omitempty" validate:"required"`
+		Jadwal      string             `json:"jadwal,omitempty" validate:"required"`
+		Pdn         float32            `json:"pdn,omitempty" validate:"required"`
+		Tipe        string             `json:"tipe,omitempty" validate:"required"`
+		Ket         string             `json:"ket,omitempty" validate:"required"`
+		Pelaksanaan string             `json:"pelaksanaan,omitempty" validate:"required"`
+		Pemilihan   string             `json:"pemilihan,omitempty" validate:"required"`
+		Tender      string             `json:"tender,omitempty" validate:"required"`
+		Idpagu      string             `json:"idpagu,omitempty" validate:"required"`
+	*/
 
 	result, err := langsungCollection.InsertOne(ctx, newLangsung)
 	if err != nil {
@@ -89,10 +108,7 @@ func GetFilterLangsung(c *fiber.Ctx) error {
 	paguId := c.Params("paguId")
 	var langsungs []models.Langsung
 	defer cancel()
-	//objId, _ := primitive.ObjectIDFromHex(paguId)
-	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
 	results, err := langsungCollection.Find(ctx, bson.M{"idpagu": paguId})
-	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
@@ -120,12 +136,7 @@ func GetFilterLangsungByType(c *fiber.Ctx) error {
 	tipe := c.Params(("tipe"))
 	var langsungs []models.Langsung
 	defer cancel()
-	//objId, _ := primitive.ObjectIDFromHex(paguId)
-	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
-	//(ctx, User{Name: "UserName", Phone: "1234567890"})
 	results, err := langsungCollection.Find(ctx, bson.M{"idpagu": paguId, "tipe": tipe})
-	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
-
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -187,21 +198,6 @@ func EditLangsug(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	/*
-
-		newLangsung := models.Langsung{
-			Id:     primitive.NewObjectID(),
-			Name:   langsung.Name,
-			Paket:  langsung.Paket,
-			Pagu:   langsung.Pagu,
-			Jadwal: langsung.Jadwal,
-			Pdn:    langsung.Pdn,
-			Tipe:   langsung.Tipe,
-			Ket:    langsung.Ket,
-			Idpagu: langsung.Idpagu,
-		}
-	*/
-
 	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket}
 
 	result, err := langsungCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
@@ -210,7 +206,7 @@ func EditLangsug(c *fiber.Ctx) error {
 	}
 
 	//get updated user details
-	var updateTender models.Tender
+	var updateTender models.Langsung
 	if result.MatchedCount == 1 {
 		err := langsungCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updateTender)
 		if err != nil {
@@ -297,6 +293,7 @@ func GetAllTotalTenderLangsung(c *fiber.Ctx) error {
 	var totalTenders []models.Totaltipe
 	defer cancel()
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	matchStageNext := bson.D{{"$match", bson.D{{"tender", "default"}}}}
 	sortStage := bson.D{{"$sort", bson.D{{"tipe", 1}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
@@ -314,7 +311,7 @@ func GetAllTotalTenderLangsung(c *fiber.Ctx) error {
 		}},
 	}
 
-	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage, projectStage, sortStage})
+	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, matchStageNext, groupStage, projectStage, sortStage})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -336,15 +333,63 @@ func GetAllTotalTenderLangsung(c *fiber.Ctx) error {
 
 }
 
-func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
+func GetAllTotalTenderLangsungBySeleksiCepat(c *fiber.Ctx) error {
 	//fmt.Print("dieksekusi")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	//paguId := c.Params("paguId")
+	paguId := c.Params("paguId")
 	//tipe := c.Params("tipe")
+	var totalTenders []models.Totalseleksi
+	defer cancel()
+	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	// { status: { $ne: "A" } }
+	matchStageNext := bson.D{{"$match", bson.D{{"tender", bson.D{{"$ne", "default"}}}}}}
+	sortStage := bson.D{{"$sort", bson.D{{"tender", 1}}}}
+	groupStage := bson.D{
+		{"$group", bson.D{
+			{"_id", "$tender"},
+			{"total", bson.D{{"$sum", 1}}},
+			{"totalPagu", bson.D{{"$sum", "$pagu"}}},
+		}},
+	}
+	projectStage := bson.D{
+		{"$project", bson.D{
+			{"_id", 0},
+			{"tender", "$_id"},
+			{"total", 1},
+			{"totalPagu", 1},
+		}},
+	}
+
+	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, matchStageNext, groupStage, projectStage, sortStage})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleTender models.Totalseleksi
+		if err = results.Decode(&singleTender); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+		//fmt.Println(results)
+		totalTenders = append(totalTenders, singleTender)
+		//fmt.Print((totalTenders))
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": totalTenders}},
+	)
+
+}
+
+func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
 	var totalTenders []models.Totaltipe
 	defer cancel()
-	//matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+
 	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
@@ -366,18 +411,15 @@ func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
-
-	//reading from the db in an optimal way
-	//fmt.Print("disekskusi")
 	defer results.Close(ctx)
 	for results.Next(ctx) {
 		var singleTender models.Totaltipe
 		if err = results.Decode(&singleTender); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
-		//fmt.Println(results)
+
 		totalTenders = append(totalTenders, singleTender)
-		//fmt.Print((totalTenders))
+
 	}
 
 	return c.Status(http.StatusOK).JSON(
@@ -386,16 +428,15 @@ func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
 }
 
 func GetAllTotalTenderPdnAll(c *fiber.Ctx) error {
-	//fmt.Print("dieksekusi")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	paguId := c.Params("paguId")
-	//tipe := c.Params("tipe")
+
 	var totalTenders []models.Totaltender
 	defer cancel()
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
 	sortStage := bson.D{{"$sort", bson.D{{"name", 1}}}}
-	//{$divide: ["$details.salary", 2]}}
+
 	groupStage := bson.D{
 		{"$group", bson.D{
 			{"_id", "$name"},
