@@ -390,6 +390,7 @@ func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
 	var totalTenders []models.Totaltipe
 	defer cancel()
 
+	matchStageNext := bson.D{{"$match", bson.D{{"tipe", bson.D{{"$ne", "default"}}}}}}
 	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
 	groupStage := bson.D{
 		{"$group", bson.D{
@@ -407,7 +408,7 @@ func GetAllTotalTenderLangsungAll(c *fiber.Ctx) error {
 		}},
 	}
 
-	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{groupStage, projectStage, sortStage})
+	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStageNext, groupStage, projectStage, sortStage})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
