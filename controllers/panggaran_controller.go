@@ -180,3 +180,53 @@ func GetAnggaran(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": tender}})
 }
+
+func GetAllTotalTenderPdnAllTender(c *fiber.Ctx) error {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	paguId := c.Params("paguId")
+	//tipe := c.Params("tipe")
+	var totalTenders []models.Totaltender
+	defer cancel()
+	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
+	//{$divide: ["$details.salary", 2]}}
+	groupStage := bson.D{
+		{"$group", bson.D{
+			{"_id", "$name"},
+			{"total", bson.D{{"$sum", 1}}},
+			{"totalPagu", bson.D{{"$sum", "$pagu"}}},
+			{"pdn", bson.D{{"$avg", "$pdn"}}},
+		}},
+	}
+	projectStage := bson.D{
+		{"$project", bson.D{
+			{"_id", 0},
+			{"name", "$_id"},
+			{"total", 1},
+			{"totalPagu", 1},
+			{"pdn", 1},
+			{"idpagu", 1},
+		}},
+	}
+
+	results, err := panggaranCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage, projectStage, sortStage})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleTender models.Totaltender
+		if err = results.Decode(&singleTender); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+		//fmt.Println(results)
+		totalTenders = append(totalTenders, singleTender)
+		//fmt.Print((totalTenders))
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": totalTenders}},
+	)
+}
