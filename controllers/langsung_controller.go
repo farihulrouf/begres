@@ -52,22 +52,6 @@ func CreateLangsung(c *fiber.Ctx) error {
 		Idpagu:      langsung.Idpagu,
 	}
 
-	/*
-
-		Id          primitive.ObjectID `json:"id,omitempty"`
-		Name        string             `json:"name,omitempty" validate:"required"`
-		Paket       string             `json:"paket,omitempty" validate:"required"`
-		Pagu        float32            `json:"pagu,omitempty" validate:"required"`
-		Jadwal      string             `json:"jadwal,omitempty" validate:"required"`
-		Pdn         float32            `json:"pdn,omitempty" validate:"required"`
-		Tipe        string             `json:"tipe,omitempty" validate:"required"`
-		Ket         string             `json:"ket,omitempty" validate:"required"`
-		Pelaksanaan string             `json:"pelaksanaan,omitempty" validate:"required"`
-		Pemilihan   string             `json:"pemilihan,omitempty" validate:"required"`
-		Tender      string             `json:"tender,omitempty" validate:"required"`
-		Idpagu      string             `json:"idpagu,omitempty" validate:"required"`
-	*/
-
 	result, err := langsungCollection.InsertOne(ctx, newLangsung)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
@@ -198,7 +182,7 @@ func EditLangsug(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket}
+	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu}
 
 	result, err := langsungCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {

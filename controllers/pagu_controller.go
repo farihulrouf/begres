@@ -39,6 +39,7 @@ func CreatePagu(c *fiber.Ctx) error {
 		Name:      pagu.Name,
 		Paguopdp:  pagu.Paguopdp,
 		Paguorp:   pagu.Paguorp,
+		Filetipe:  pagu.Filetipe,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
