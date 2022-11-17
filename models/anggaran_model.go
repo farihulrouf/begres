@@ -2,7 +2,7 @@ package models
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type Panggaran struct {
+type Anggaran struct {
 	Id     primitive.ObjectID `json:"id,omitempty"`
 	Name   string             `json:"name,omitempty" validate:"required"`
 	Paket  string             `json:"paket,omitempty" validate:"required"`
