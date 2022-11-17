@@ -189,7 +189,7 @@ func GetAllTotalTenderPdnAllTender(c *fiber.Ctx) error {
 	var totalTenders []models.Totaltender
 	defer cancel()
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
-	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
+	sortStage := bson.D{{"$sort", bson.D{{"name", 1}}}}
 	//{$divide: ["$details.salary", 2]}}
 	groupStage := bson.D{
 		{"$group", bson.D{

@@ -394,7 +394,7 @@ func GetAllTotalTenderPdnAll(c *fiber.Ctx) error {
 	var totalTenders []models.Totaltender
 	defer cancel()
 	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
-	sortStage := bson.D{{"$sort", bson.D{{"total", 1}}}}
+	sortStage := bson.D{{"$sort", bson.D{{"name", 1}}}}
 	//{$divide: ["$details.salary", 2]}}
 	groupStage := bson.D{
 		{"$group", bson.D{
@@ -414,15 +414,6 @@ func GetAllTotalTenderPdnAll(c *fiber.Ctx) error {
 			{"idpagu", 1},
 		}},
 	}
-
-	/*
-		{{"$lookup", bson.M{
-			"from":         "profile",
-			"localField":   "partnerA.id",
-			"foreignField": "_id",
-			"as":           "profile",
-		}}},
-	*/
 
 	results, err := langsungCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage, projectStage, sortStage})
 	if err != nil {
