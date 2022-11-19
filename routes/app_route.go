@@ -40,6 +40,8 @@ func AppRoute(app *fiber.App) {
 	app.Get("/api/jumlahtotal", controllers.GetAllTotalTenderLangsungAll)
 	app.Get("/api/totalpdn/:paguId", controllers.GetAllTotalTenderPdnAll)
 
+	//app.Get("/api/jumlahratapdn/:paguId", controllers.GetAllTotalTenderPdnLookup)
+	//GetAllTotalTenderPdnLookup
 	app.Delete("/api/langsung/:paguId", controllers.DeleteLangsung)
 	app.Put("/api/langsung/:paguId", controllers.EditLangsug)
 

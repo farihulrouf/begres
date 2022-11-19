@@ -80,11 +80,11 @@ func GetFilterAnggaran(c *fiber.Ctx) error {
 	paguId := c.Params("paguId")
 	var panggarans []models.Anggaran
 	defer cancel()
-	//objId, _ := primitive.ObjectIDFromHex(paguId)
-	// csr, err := db.Collection("student").Find(ctx, bson.M{"name": "Wick"})
-	results, err := anggaranCollection.Find(ctx, bson.M{"idpagu": paguId})
-	//err := paguCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&pagu)
+	sortStage := bson.D{{"$sort", bson.D{{"name", 1}}}}
+	matchStage := bson.D{{"$match", bson.D{{"idpagu", paguId}}}}
+	//results, err := anggaranCollection.Find(ctx, bson.M{"idpagu": paguId})
 
+	results, err := anggaranCollection.Aggregate(ctx, mongo.Pipeline{matchStage, sortStage})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
