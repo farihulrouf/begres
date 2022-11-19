@@ -35,7 +35,8 @@ func AppRoute(app *fiber.App) {
 	app.Get("/api/langsung/totalsemua/:paguId", controllers.GetAllTotalTenderLangsung)
 
 	app.Get("/api/langsung/totalseleksitender/:paguId", controllers.GetAllTotalTenderLangsungBySeleksiCepat)
-	//GetAllTotalTenderLangsungBySeleksiCepat
+	//GetAllTotalTenderCepatAllSeleksi
+	app.Get("/api/jumlahtotalseleksi", controllers.GetAllTotalTenderCepatAllSeleksi)
 	app.Get("/api/jumlahtotal", controllers.GetAllTotalTenderLangsungAll)
 	app.Get("/api/totalpdn/:paguId", controllers.GetAllTotalTenderPdnAll)
 
