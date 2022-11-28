@@ -84,22 +84,46 @@ func GetAllPagu(c *fiber.Ctx) error {
 
 func GetAllFilter(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	findOptions := options.Find()
+
 	filter := bson.M{}
+	findOptions := options.Find()
+	if s := c.Query("s"); s != "" {
+		filter = bson.M{
+			"$or": []bson.M{
+				{
+					"name": bson.M{
+						"$regex": primitive.Regex{
+							Pattern: s,
+							Options: "i",
+						},
+					},
+				},
+			},
+		}
+	}
+
+	if sort := c.Query("sort"); sort != "" {
+		if sort == "asc" {
+			findOptions.SetSort(bson.D{{"name", 1}})
+		} else if sort == "desc" {
+			findOptions.SetSort(bson.D{{"name", -1}})
+		}
+	}
+
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	var perPage int64 = 2
 
 	total, _ := paguCollection.CountDocuments(ctx, filter)
-
+	totalData := total
 	findOptions.SetSkip((int64(page) - 1) * perPage)
 	findOptions.SetLimit(perPage)
 	var pagus []models.Pagu
 	defer cancel()
 
 	results, err := paguCollection.Find(ctx, filter, findOptions)
-	fmt.Print(total)
+	//fmt.Print(total)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		return c.Status(http.StatusInternalServerError).JSON(responses.Responsefilter{Status: http.StatusInternalServerError, Message: "error", Total: 0, Data: &fiber.Map{"data": err.Error()}})
 	}
 
 	//reading from the db in an optimal way
@@ -108,14 +132,14 @@ func GetAllFilter(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singlePagu models.Pagu
 		if err = results.Decode(&singlePagu); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+			return c.Status(http.StatusInternalServerError).JSON(responses.Responsefilter{Status: http.StatusInternalServerError, Message: "error", Total: 0, Data: &fiber.Map{"data": err.Error()}})
 		}
 
 		pagus = append(pagus, singlePagu)
 	}
 
 	return c.Status(http.StatusOK).JSON(
-		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": pagus}},
+		responses.Responsefilter{Status: http.StatusOK, Message: "success", Total: int(totalData), Data: &fiber.Map{"data": pagus}},
 	)
 }
 
