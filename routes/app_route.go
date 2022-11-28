@@ -11,6 +11,7 @@ func AppRoute(app *fiber.App) {
 
 	app.Post("/api/pagus", controllers.CreatePagu)
 	app.Get("/api/pagus", controllers.GetAllPagu)
+	app.Get("/api/pagus/filter", controllers.GetAllFilter)
 	app.Get("/api/pagus/:paguId", controllers.GetPagu)
 	app.Delete("/api/pagus/:paguId", controllers.DeletePagu)
 	app.Put("/api/pagus/:paguId", controllers.EditPagu)

@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -14,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var paguCollection *mongo.Collection = configs.GetCollection(configs.DB, "pagus")
@@ -64,6 +66,44 @@ func GetAllPagu(c *fiber.Ctx) error {
 	}
 
 	//reading from the db in an optimal way
+
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singlePagu models.Pagu
+		if err = results.Decode(&singlePagu); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+
+		pagus = append(pagus, singlePagu)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": pagus}},
+	)
+}
+
+func GetAllFilter(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	findOptions := options.Find()
+	filter := bson.M{}
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	var perPage int64 = 2
+
+	total, _ := paguCollection.CountDocuments(ctx, filter)
+
+	findOptions.SetSkip((int64(page) - 1) * perPage)
+	findOptions.SetLimit(perPage)
+	var pagus []models.Pagu
+	defer cancel()
+
+	results, err := paguCollection.Find(ctx, filter, findOptions)
+	fmt.Print(total)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+
 	defer results.Close(ctx)
 	for results.Next(ctx) {
 		var singlePagu models.Pagu
