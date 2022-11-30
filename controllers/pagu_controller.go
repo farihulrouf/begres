@@ -111,7 +111,7 @@ func GetAllFilter(c *fiber.Ctx) error {
 	}
 
 	page, _ := strconv.Atoi(c.Query("page", "1"))
-	var perPage int64 = 2
+	var perPage int64 = 10
 
 	total, _ := paguCollection.CountDocuments(ctx, filter)
 	totalData := total
