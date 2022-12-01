@@ -10,7 +10,7 @@ func Authentication(c *fiber.Ctx) error {
 	clientToken := c.Get("token")
 	if clientToken == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "unathenticated header",
+			"message": "unauthenticated request authorization header is missing",
 		})
 	}
 
