@@ -31,13 +31,12 @@ var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users"
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 // GenerateAllTokens generates both teh detailed token and refresh token
-func GenerateAllTokens(email string, firstName string, lastName string, userType string, uid string) (signedToken string, signedRefreshToken string, err error) {
+func GenerateAllTokens(email string, firstName string, lastName string, uid string) (signedToken string, signedRefreshToken string, err error) {
 	claims := &SignDetails{
 		Email:      email,
 		First_name: firstName,
 		Last_name:  lastName,
 		Uid:        uid,
-		User_type:  userType,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
 		},
@@ -60,7 +59,7 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 	return token, refreshToken, err
 }
 
-// ValidateToken validates the jwt token
+// /ValidateToken validates the jwt token
 func ValidateToken(signedToken string) (claims *SignDetails, msg string) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
@@ -123,6 +122,5 @@ func UpdateAllTokens(signedToken string, signedRefreshToken string, userId strin
 		log.Panic(err)
 		return
 	}
-
 	return
 }

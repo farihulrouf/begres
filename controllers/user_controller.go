@@ -82,7 +82,9 @@ func SingUp(c *fiber.Ctx) error {
 	user.ID = primitive.NewObjectID()
 	user.User_id = user.ID.Hex()
 	//token, refreshToken, _ := helper
-	token, refreshToken, _ := helper.GenerateAllTokens(*user.Email, *user.First_name, *user.Last_name, *user.User_type, *&user.User_id)
+
+	token, refreshToken, _ := helper.GenerateAllTokens(*user.Email, *user.First_name, *user.Last_name, user.User_id)
+	//token, refreshToken, _ := helper.GenerateAllTokens(*user.Email, *user.First_name, *user.Last_name, *user.User_type, *&user.User_id)
 	user.Token = &token
 	user.Refresh_token = &refreshToken
 	resultInsertionNumber, insertErr := userCollection.InsertOne(ctx, user)

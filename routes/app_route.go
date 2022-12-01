@@ -7,8 +7,10 @@ import (
 )
 
 func AppRoute(app *fiber.App) {
-	//Post Pagu
 
+	app.Post("/api/users/singup", controllers.SingUp)
+
+	//Post Pagu
 	app.Post("/api/pagus", controllers.CreatePagu)
 	app.Get("/api/pagus", controllers.GetAllPagu)
 	app.Get("/api/pagus/filter", controllers.GetAllFilter)
