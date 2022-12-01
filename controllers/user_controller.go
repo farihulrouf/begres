@@ -59,8 +59,9 @@ func SingUp(c *fiber.Ctx) error {
 	defer cancel()
 	if err != nil {
 		log.Panic(err)
-		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error occured while checking for the email", Data: &fiber.Map{"data": err.Error()}})
-
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Email Already exist",
+		})
 	}
 	password := HassPassword(*user.Password)
 	user.Password = &password
@@ -69,12 +70,16 @@ func SingUp(c *fiber.Ctx) error {
 	count, err = userCollection.CountDocuments(ctx, bson.M{"phone": user.Phone})
 	defer cancel()
 	if err != nil {
-		log.Panic(err)
-		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "error occured while checking for the phone number", Data: &fiber.Map{"data": err.Error()}})
+		//log.Panic(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Phone Already exist",
+		})
 	}
 
 	if count > 0 {
-		return c.Status(http.StatusInternalServerError).JSON(responses.Response{Status: http.StatusInternalServerError, Message: "this email or phone number already exists", Data: &fiber.Map{"data": err.Error()}})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "This Email and Phone Already exist",
+		})
 	}
 
 	user.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -96,5 +101,35 @@ func SingUp(c *fiber.Ctx) error {
 	defer cancel()
 
 	return c.Status(http.StatusCreated).JSON(responses.Response{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": resultInsertionNumber}})
+
+}
+func Login(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var user models.User
+	var foundUser models.User
+
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+	defer cancel()
+	if err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "User Not Found",
+		})
+	}
+	passwordIsValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
+	defer cancel()
+	if passwordIsValid != true {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": msg,
+		})
+	}
+
+	token, refreshToken, _ := helper.GenerateAllTokens(*foundUser.Email, *foundUser.First_name, *foundUser.Last_name, foundUser.User_id)
+	helper.UpdateAllTokens(token, refreshToken, foundUser.User_id)
+	return c.Status(http.StatusCreated).JSON(responses.Response{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": foundUser}})
 
 }

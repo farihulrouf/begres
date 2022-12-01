@@ -9,6 +9,7 @@ import (
 func AppRoute(app *fiber.App) {
 
 	app.Post("/api/users/singup", controllers.SingUp)
+	app.Post("/api/users/login", controllers.Login)
 
 	//Post Pagu
 	app.Post("/api/pagus", controllers.CreatePagu)
