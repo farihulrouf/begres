@@ -11,16 +11,16 @@ func AppRoute(app *fiber.App) {
 
 	app.Post("/api/users/singup", controllers.SingUp)
 	app.Post("/api/users/login", controllers.Login)
-	app.Get("/api/users/getall", middleware.Authentication, controllers.GetAllUser)
+	app.Get("/api/users/getall", controllers.GetAllUser)
 
 	//Post Pagu
-	app.Post("/api/pagus", controllers.CreatePagu)
+	app.Post("/api/pagus", middleware.Authentication, controllers.CreatePagu)
 	app.Get("/api/pagus", middleware.Authentication, controllers.GetAllPagu)
-	app.Get("/api/pagus/filter", controllers.GetAllFilter)
-	app.Get("/api/pagus/:paguId", controllers.GetPagu)
-	app.Delete("/api/pagus/:paguId", controllers.DeletePagu)
+	app.Get("/api/pagus/filter", middleware.Authentication, controllers.GetAllFilter)
+	app.Get("/api/pagus/:paguId", middleware.Authentication, controllers.GetPagu)
+	app.Delete("/api/pagus/:paguId", middleware.Authentication, controllers.DeletePagu)
 	app.Put("/api/pagus/:paguId", controllers.EditPagu)
-	app.Put("/api/pagus/edit/:paguId", controllers.EditPaguUpload)
+	app.Put("/api/pagus/edit/:paguId", middleware.Authentication, controllers.EditPaguUpload)
 	//EditPaguUpload
 
 	//Pagu anggaran
