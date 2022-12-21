@@ -5,6 +5,7 @@ import (
 	"begres/models"
 	"begres/responses"
 	"context"
+	"strconv"
 
 	//s"fmt"
 
@@ -17,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var langsungCollection *mongo.Collection = configs.GetCollection(configs.DB, "langsung")
@@ -50,6 +52,8 @@ func CreateLangsung(c *fiber.Ctx) error {
 		Ket:         langsung.Ket,
 		Tender:      langsung.Tender,
 		Idpagu:      langsung.Idpagu,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	result, err := langsungCollection.InsertOne(ctx, newLangsung)
@@ -111,6 +115,67 @@ func GetFilterLangsung(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(
 		responses.Response{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": langsungs}},
+	)
+}
+
+func GetFilterAngaran(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	filter := bson.M{}
+	findOptions := options.Find()
+	if s := c.Query("s"); s != "" {
+		filter = bson.M{
+			"$or": []bson.M{
+				{
+					"name": bson.M{
+						"$regex": primitive.Regex{
+							Pattern: s,
+							Options: "i",
+						},
+					},
+				},
+			},
+		}
+	}
+
+	if sort := c.Query("sort"); sort != "" {
+		if sort == "asc" {
+			findOptions.SetSort(bson.D{{"name", 1}})
+		} else if sort == "desc" {
+			findOptions.SetSort(bson.D{{"name", -1}})
+		}
+	}
+
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	var perPage int64 = 10
+
+	total, _ := langsungCollection.CountDocuments(ctx, filter)
+	totalData := total
+	findOptions.SetSkip((int64(page) - 1) * perPage)
+	findOptions.SetLimit(perPage)
+	var pagus []models.Pagu
+	defer cancel()
+
+	results, err := langsungCollection.Find(ctx, filter, findOptions)
+	//fmt.Print(total)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.Responsefilter{Status: http.StatusInternalServerError, Message: "error", Total: 0, Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singlePagu models.Pagu
+		if err = results.Decode(&singlePagu); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.Responsefilter{Status: http.StatusInternalServerError, Message: "error", Total: 0, Data: &fiber.Map{"data": err.Error()}})
+		}
+
+		pagus = append(pagus, singlePagu)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.Responsefilter{Status: http.StatusOK, Message: "success", Total: int(totalData), Data: &fiber.Map{"data": pagus}},
 	)
 }
 
@@ -182,7 +247,7 @@ func EditLangsug(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu}
+	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu, "updatedat": time.Now()}
 
 	result, err := langsungCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {

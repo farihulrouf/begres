@@ -6,14 +6,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Anggaran struct {
+type Access struct {
 	Id        primitive.ObjectID `json:"id,omitempty"`
 	Name      string             `json:"name,omitempty" validate:"required"`
-	Paket     string             `json:"paket,omitempty" validate:"required"`
-	Pagu      float64            `json:"pagu,omitempty" validate:"required"`
-	Jadwal    string             `json:"jadwal,omitempty" validate:"required"`
-	Pdn       float32            `json:"pdn,omitempty" validate:"required"`
 	Idpagu    string             `json:"idpagu,omitempty" validate:"required"`
+	UserId    string             `json:"userId,omitempty" validate:"required"`
 	CreatedAt time.Time          `json:”created_at,omitempty” bson:”created_at”`
 	UpdatedAt time.Time          `json:”updated_at,omitempty” bson:”updated_at”`
 }
