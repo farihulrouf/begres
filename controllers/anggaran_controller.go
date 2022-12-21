@@ -32,15 +32,17 @@ func CreateAnggaran(c *fiber.Ctx) error {
 	}
 
 	newPanggaran := models.Anggaran{
-		Id:        primitive.NewObjectID(),
-		Name:      panggaran.Name,
-		Pagu:      panggaran.Pagu,
-		Paket:     panggaran.Paket,
-		Jadwal:    panggaran.Jadwal,
-		Pdn:       panggaran.Pdn,
-		Idpagu:    panggaran.Idpagu,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Id:         primitive.NewObjectID(),
+		Name:       panggaran.Name,
+		Pagu:       panggaran.Pagu,
+		Paket:      panggaran.Paket,
+		Jadwal:     panggaran.Jadwal,
+		Pdn:        panggaran.Pdn,
+		Idpagu:     panggaran.Idpagu,
+		UserCreate: panggaran.UserCreate,
+		UserUpdate: panggaran.UserUpdate,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 
 	result, err := anggaranCollection.InsertOne(ctx, newPanggaran)
@@ -148,7 +150,7 @@ func EditAnggaran(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": anggaran.Name, "paket": anggaran.Paket, "pagu": anggaran.Pagu, "jadwal": anggaran.Jadwal, "pdn": anggaran.Pdn, "idpagu": anggaran.Idpagu, "updatedat": time.Now()}
+	update := bson.M{"name": anggaran.Name, "paket": anggaran.Paket, "pagu": anggaran.Pagu, "jadwal": anggaran.Jadwal, "pdn": anggaran.Pdn, "idpagu": anggaran.Idpagu, "updatedat": time.Now(), "userupdate": anggaran.UserUpdate}
 
 	result, err := anggaranCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {

@@ -52,6 +52,8 @@ func CreateLangsung(c *fiber.Ctx) error {
 		Ket:         langsung.Ket,
 		Tender:      langsung.Tender,
 		Idpagu:      langsung.Idpagu,
+		UserCreate:  langsung.UserCreate,
+		UserUpdate:  langsung.UserUpdate,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -247,7 +249,7 @@ func EditLangsug(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu, "updatedat": time.Now()}
+	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu, "updatedat": time.Now(), "userupdate": langsung.UserUpdate}
 
 	result, err := langsungCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {

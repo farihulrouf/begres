@@ -19,6 +19,8 @@ type Langsung struct {
 	Pemilihan   string             `json:"pemilihan,omitempty" validate:"required"`
 	Tender      string             `json:"tender,omitempty" validate:"required"`
 	Idpagu      string             `json:"idpagu,omitempty" validate:"required"`
+	UserCreate  string             `json:"usercreate,omitempty" bson:”usercreate"`
+	UserUpdate  string             `json:"userupdate,omitempty" bson:"userupdate"`
 	CreatedAt   time.Time          `json:”created_at,omitempty” bson:”created_at”`
 	UpdatedAt   time.Time          `json:”updated_at,omitempty” bson:”updated_at”`
 }
