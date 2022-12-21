@@ -18,6 +18,8 @@ var anggaranCollection *mongo.Collection = configs.GetCollection(configs.DB, "an
 
 func CreateAnggaran(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	var panggaran models.Anggaran
 	defer cancel()
 
@@ -41,8 +43,8 @@ func CreateAnggaran(c *fiber.Ctx) error {
 		Idpagu:     panggaran.Idpagu,
 		UserCreate: panggaran.UserCreate,
 		UserUpdate: panggaran.UserUpdate,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
+		CreatedAt:  time.Now().In(loc),
+		UpdatedAt:  time.Now().In(loc),
 	}
 
 	result, err := anggaranCollection.InsertOne(ctx, newPanggaran)
@@ -135,6 +137,7 @@ func DeleteAnggran(c *fiber.Ctx) error {
 func EditAnggaran(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	anggaranId := c.Params("paguId")
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	var anggaran models.Anggaran
 	defer cancel()
 
@@ -150,7 +153,7 @@ func EditAnggaran(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": anggaran.Name, "paket": anggaran.Paket, "pagu": anggaran.Pagu, "jadwal": anggaran.Jadwal, "pdn": anggaran.Pdn, "idpagu": anggaran.Idpagu, "updatedat": time.Now(), "userupdate": anggaran.UserUpdate}
+	update := bson.M{"name": anggaran.Name, "paket": anggaran.Paket, "pagu": anggaran.Pagu, "jadwal": anggaran.Jadwal, "pdn": anggaran.Pdn, "idpagu": anggaran.Idpagu, "updatedat": time.Now().In(loc), "userupdate": anggaran.UserUpdate}
 
 	result, err := anggaranCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {

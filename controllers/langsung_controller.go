@@ -5,6 +5,7 @@ import (
 	"begres/models"
 	"begres/responses"
 	"context"
+	"fmt"
 	"strconv"
 
 	//s"fmt"
@@ -27,6 +28,7 @@ var validate = validator.New()
 func CreateLangsung(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var langsung models.Langsung
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	defer cancel()
 
 	//validate the request body
@@ -54,8 +56,12 @@ func CreateLangsung(c *fiber.Ctx) error {
 		Idpagu:      langsung.Idpagu,
 		UserCreate:  langsung.UserCreate,
 		UserUpdate:  langsung.UserUpdate,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		CreatedAt:   time.Now().In(loc),
+		UpdatedAt:   time.Now().In(loc),
+		//
+		//loc, _ := time.LoadLocation("Asia/Jakarta")
+
+		//fmt.Println(time.Now().In(loc))
 	}
 
 	result, err := langsungCollection.InsertOne(ctx, newLangsung)
@@ -234,6 +240,8 @@ func DeleteLangsung(c *fiber.Ctx) error {
 func EditLangsug(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	langsungId := c.Params("paguId")
+
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 	var langsung models.Langsung
 	defer cancel()
 
@@ -248,8 +256,8 @@ func EditLangsug(c *fiber.Ctx) error {
 	if validationErr := validate.Struct(&langsung); validationErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.Response{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
-
-	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu, "updatedat": time.Now(), "userupdate": langsung.UserUpdate}
+	fmt.Println(time.Now().In(loc))
+	update := bson.M{"name": langsung.Name, "paket": langsung.Paket, "pagu": langsung.Pagu, "jadwal": langsung.Jadwal, "pelaksanaan": langsung.Pelaksanaan, "pemilihan": langsung.Pemilihan, "pdn": langsung.Pdn, "tipe": langsung.Tipe, "ket": langsung.Ket, "tender": langsung.Tender, "idpagu": langsung.Idpagu, "updatedat": time.Now().In(loc), "userupdate": langsung.UserUpdate}
 
 	result, err := langsungCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 	if err != nil {
