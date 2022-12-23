@@ -39,6 +39,8 @@ func AppRoute(app *fiber.App) {
 	app.Delete("/api/anggaran/:paguId", middleware.Authentication, controllers.DeleteAnggran)
 	app.Put("/api/anggaran/:paguId", middleware.Authentication, controllers.EditAnggaran)
 	app.Get("/api/anggaran/:paguId", middleware.Authentication, controllers.GetAnggaran)
+	app.Get("/api/anggaran/pagu/total/:paguId", middleware.Authentication, controllers.GetAllTotalPaguAnggaran)
+	//GetAllTotalPaguAnggaran
 
 	//langsung
 	app.Post("/api/langsung", middleware.Authentication, controllers.CreateLangsung)
