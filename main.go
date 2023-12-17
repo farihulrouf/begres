@@ -18,7 +18,7 @@ func main() {
 		Next:             nil,
 		AllowOrigins:     "*",
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
-		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowHeaders:     "",
 		AllowCredentials: false,
 		ExposeHeaders:    "",
 		MaxAge:           0,
