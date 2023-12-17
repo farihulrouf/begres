@@ -10,7 +10,7 @@ import (
 
 func main() {
 	app := fiber.New()
-
+	port := os.Getenv("PORT")
 	//run database
 
 	app.Use(cors.New(cors.Config{
@@ -28,7 +28,7 @@ func main() {
 
 	//routes
 	routes.AppRoute(app) //add this
-
-	app.Listen(":3000")
+	
+	app.Listen(":"+port)
 
 }
