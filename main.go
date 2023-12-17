@@ -12,12 +12,13 @@ func main() {
 	app := fiber.New()
 	port := os.Getenv("PORT")
 	//run database
-
+	
+	
 	app.Use(cors.New(cors.Config{
 		Next:             nil,
 		AllowOrigins:     "*",
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
-		AllowHeaders:     "",
+		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: false,
 		ExposeHeaders:    "",
 		MaxAge:           0,
